@@ -1,11 +1,12 @@
-/** Messages using cloud pub/sub */
+/** Messages using cloud pub/sub library. */
 
 var messages = (function(){
     var clientId = '388468322983-72fd13eu4l5vad93ljef5a71s5ujpbch.apps.googleusercontent.com';
-    var clientSecret = '5J4hsHo4paN8MRQZdLyRBrBw';
     var pubsubScopes = ['https://www.googleapis.com/auth/pubsub',
 						            'https://www.googleapis.com/auth/cloud-platform'].join(' ');
 	  var apiKey = 'AIzaSyBm2-1AaEqgq4UkGtZXt__3XGfSiBSA2-0';
+    
+    var pusub;
     
 	  /** Initialize the module with auth2 and pubsub API. */
 	  var init = function() {
@@ -14,12 +15,14 @@ var messages = (function(){
 			      client_id: clientId,
 			      scope: pubsubScopes
 		    });
-        gapi.client.load('pubsub');
+        gapi.client.load('pubsub').then(function(){
+            pubsub = gapi.client.pubsub;
+        }
 	  };
 	  
     /** List the number of subscriptions. */
 	  var listSubscriptions = function() {
-		    gapi.client.pubsub.projects.subscriptions.list(
+		    pubsub.projects.subscriptions.list(
 			      {"project": "projects/msgs-sample/topics/my-first-topic"}
 		    ).then(function(resp) {
             console.log(resp);
@@ -28,7 +31,7 @@ var messages = (function(){
 
     /** */
     var logMessages = function(subscription) {
-        gapi.client.pubsub.projects.subscriptions.pull(
+        pubsub.projects.subscriptions.pull(
             {'subscription': subscription,
              'returnImmediately': true,
              'maxMessages': 1}
@@ -54,16 +57,21 @@ var messages = (function(){
     var acknowledgeIfNecessary = function(subscription, result) {
         if (result.receivedMessages) {
             result.receivedMessages.forEach(function(message) {
-                gapi.client.pubsub.projects.subscriptions.acknowledge(
+                pubsub.projects.subscriptions.acknowledge(
                     {'subscription': subscription,
                      'ackIds': [message.ackId]}
                 ).then(checkResponse);
             });
         }
     };
-    
+
+    /** 
+        Get at most one message and calls the callback with result.
+        
+        It will acknowledge if it successfully pulles an message.
+     */
     var getMessage = function(subscription, callback) {
-        gapi.client.pubsub.projects.subscriptions.pull(
+        pubsub.projects.subscriptions.pull(
             {'subscription': subscription,
              'returnImmediately': true,
              'maxMessages': 1}).then(function(resp) {
