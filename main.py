@@ -12,7 +12,7 @@ def send_js(path):
 
 
 @app.route('/')
-def hello():
+def index():
     """Return a friendly HTTP greeting."""
     return send_from_directory('html', 'index.html')
 
