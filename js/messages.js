@@ -20,7 +20,7 @@ var messages = (function(){
     });
     gapi.client.load('pubsub').then(function(){
       pubsub = gapi.client.pubsub;
-    }
+    });
   };
 
   /** List the number of subscriptions. */
@@ -47,9 +47,9 @@ var messages = (function(){
   var checkResponse = function(resp) {
     if (resp.status != 200) {
       console.log('Error ' + resp);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   /** TODO(zhihan): Add a method to create a subscription. */
@@ -62,9 +62,12 @@ var messages = (function(){
 
   }
 
-  /** TODO(zhihan): Add the following. */
-  var publishMessage = function(topic, name) {
-
+  /** Publish a message to the topic */
+  var publishMessage = function(topic, data) {
+    pubsub.projects.topics.publish({
+      'topic': topic,
+      'messages': [{'data': btoa(data)}]
+    }).then(checkResponse);
   }
 
   /** Acknoledge receiption of the messages. */
@@ -91,6 +94,7 @@ var messages = (function(){
        'maxMessages': 1}
      ).then(function(resp) {
        if (checkResponse(resp)) {
+         var result = resp.result;
          acknowledgeIfNecessary(subscription, result);
          callback(result);
        }

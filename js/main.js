@@ -11,6 +11,9 @@
 
     var refreshBtn = document.getElementById('btn-refresh');
     refreshBtn.onclick = refreshMessages;
+
+    var publishBtn = document.getElementById('btn-publish');
+    publishBtn.onclick = publishMessage;
   }
 
   var updateMessages = function(result) {
@@ -29,6 +32,16 @@
                         updateMessages);
   }
 
+  var publishMessage = function() {
+    var input = document.getElementById('input-msg').value;
+    var msg = input.trim();
+    if (msg.length > 0) {
+      messages.publishMessage(
+        'projects/msgs-sample/topics/my-first-topic',
+        msg
+      );
+    }
+  }
   document.addEventListener('DOMContentLoaded', init, false);
 
 })();
