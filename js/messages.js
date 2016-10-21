@@ -52,14 +52,27 @@ var messages = (function(){
     return true;
   }
 
-  /** TODO(zhihan): Add a method to create a subscription. */
-  var createSubscription = function(name) {
-
+  /** Create a subscription. */
+  var createSubscription = function(topic) {
+    var suffix = Date.now().toString();
+    var name = 'projects/msgs-sample/subscriptions/sub-' + suffix;
+    pubsub.projects.subscriptions.create(
+      {'topic': topic,
+       'name': name
+      }
+    ).then(function(resp){
+      checkResponse(resp);
+    });
+    return name;
   }
 
-  /** TODO(zhihan): Add the following. */
-  var removeSubscription = function(name) {
-
+  /** Delete the subscription. */
+  var removeSubscription = function(subscription) {
+    pubsub.projects.subscriptions.delete(
+      {'subscription': subscription}
+    ).then(function(resp){
+      checkResponse(resp);
+    });
   }
 
   /** Publish a message to the topic */
@@ -104,8 +117,12 @@ var messages = (function(){
     // Public interface
     return {
 		    init: init,
-        signIn: function(){ gapi.auth2.getAuthInstance().signIn(); },
-        signOut: function(){ gapi.auth2.getAuthInstance().signOut(); },
+        signIn: function(){
+          return gapi.auth2.getAuthInstance().signIn();
+        },
+        signOut: function(){
+          return gapi.auth2.getAuthInstance().signOut();
+        },
         logMessages: logMessages,
         getMessage: getMessage,
         publishMessage: publishMessage,
